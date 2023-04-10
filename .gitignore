@@ -24,5 +24,13 @@ dist-ssr
 *.sw?
 
 # Backup files
-index.html
-src
+src/components/clicked.js
+src/components/Questions.vue
+src/components/QuestionSlider-backup.vue
+src/components/StateInput.vue
+src/components/TestingList.vue
+src/App-copy-v2.vue
+src/App-copy-v1.vue
+src/main-backup-v1.js
+
+
