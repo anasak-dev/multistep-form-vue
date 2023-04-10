@@ -24,6 +24,6 @@ dist-ssr
 *.sw?
 
 # Backup files
-./index.html
+index.html
 
 
