@@ -1,7 +1,17 @@
 <script setup>
-import img3 from "./assets/img3.avif";
 import img6 from "./assets/img6.avif";
 import QuestionSlider from "./components/QuestionSlider.vue";
+const validateInput = (e) => {
+  const emailReg = new RegExp(e.target.getAttribute("regex"));
+  const valid = emailReg.test(e.target.value);
+  if (!valid) {
+    e.target.classList.remove("border-green-500");
+    e.target.classList.add("border-red-500");
+    return;
+  }
+  e.target.classList.add("border-green-500");
+  e.target.classList.remove("border-red-500");
+};
 </script>
 
 <template>
@@ -12,7 +22,7 @@ import QuestionSlider from "./components/QuestionSlider.vue";
 
     <QuestionSlider
       v-cloak
-      class="max-w-[320px] flex flex-col gap-4 items-center"
+      class="max-w-[420px] flex flex-col gap-4 items-center"
     >
       <template v-slot:slideItems="{ onClick }">
         <blockquote class="text-sm mb-8 italic bg-gray-100 p-2 rounded-md">
@@ -22,33 +32,45 @@ import QuestionSlider from "./components/QuestionSlider.vue";
         <li class="flex gap-4 flex-col">
           <div>
             Enter Email<span class="text-red-500">*</span>
+            <span class="text-gray-200 pl-2">e.g. joe@foo.com</span>
             <input
               type="text"
               name="email"
-              class="border border-black/30 rounded-md w-full px-4 py-2"
+              class="border border-black/30 outline-none rounded-md w-full px-4 py-2"
               required="required"
               errorMsg="Please fill the email field"
+              @input="(e) => validateInput(e)"
+              regex="^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$"
             />
           </div>
 
           <div>
-            Enter Your Phone number
+            <div class="flex">
+              Enter Phone number
+              <span class="text-gray-200 pl-2">e.g. 1234321234</span>
+            </div>
             <input
               type="text"
               name="phonenumber"
-              class="border border-black/30 rounded-md w-full px-4 py-2"
+              class="border outline-none border-black/30 rounded-md w-full px-4 py-2"
               errorMsg="Please fill phone number "
+              regex="^\d{10}$"
+              @input="(e) => validateInput(e)"
             />
           </div>
 
           <div>
             Enter Name<span class="text-red-500">*</span>
+            <span class="text-gray-200 pl-2">e.g. John Doe</span>
+
             <input
               type="text"
               name="firstname"
-              class="border border-black/30 rounded-md w-full px-4 py-2"
+              class="border border-black/30 outline-none rounded-md w-full px-4 py-2"
               required="required"
               errorMsg="Please fill the name field"
+              regex="."
+              @input="(e) => validateInput(e)"
             />
           </div>
           <div class="flex">
@@ -83,16 +105,19 @@ import QuestionSlider from "./components/QuestionSlider.vue";
           </div>
         </li>
         <li class="flex gap-4 flex-col">
-          <div class="font-bold">
+          <div class="font-bold flex">
             Case Reference Number <span class="text-red-500">*</span>
+            <span class="text-gray-200 pl-2">i.e AAA1234567</span>
           </div>
           <div>
             <input
               type="text"
               name="referencenumber"
               required
-              class="border border-black/30 rounded-md w-full px-4 py-2"
+              regex="^[a-zA-Z]{3}\d{7}$"
+              class="border border-black/30 outline-none rounded-md w-full px-4 py-2"
               errorMsg="Please fill the reference field"
+              @input="(e) => validateInput(e)"
             />
           </div>
 
