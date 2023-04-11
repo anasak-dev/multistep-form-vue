@@ -1,9 +1,16 @@
 <template>
   <div id="optionsSlider" ref="sliderRef">
     <div
-      class="flex rounded-md shadow-lg bg-white shadow-h p-6 overflow-hidden flex-col"
+      class="flex rounded-md shadow-lg bg-white shadow-h p-6 px-0 pt-0 overflow-hidden flex-col"
     >
-      <slot name="slideItems" :onClick="onClick"> </slot>
+      <div
+        v-if="props.formTracker == true"
+        class="h-[6px] bg-green-500 formTracker w-0"
+        ref="trackerRef"
+      ></div>
+      <div class="p-6">
+        <slot name="slideItems" :onClick="onClick" class=""> </slot>
+      </div>
     </div>
     <div class="flex gap-2 flex-row justify-between">
       <button
@@ -28,20 +35,24 @@
         Get Data
       </button>
     </div>
-    <transition>
-      <div
-        v-if="sliderOBJ.formSubmitted"
-        class="bg-green-200 max-w-[320px] px-4 py-6 my-4 rounded-md flex flex-col gap-4"
-      >
-        <h2 class="text-xl font-bold underline">Form submitted data</h2>
-        {{ sliderOBJ.fieldsData }}
-      </div>
-    </transition>
+    <div
+      v-if="sliderOBJ.formSubmitted"
+      class="bg-green-200 max-w-[320px] px-4 py-6 my-4 rounded-md flex flex-col gap-4"
+    >
+      <h2 class="text-xl font-bold underline">Form submitted data</h2>
+      {{ sliderOBJ.fieldsData }}
+    </div>
   </div>
 </template>
 <script setup>
 import { onMounted, reactive, ref } from "vue";
+const props = defineProps({
+  formTracker: {
+    default: false,
+  },
+});
 const sliderRef = ref();
+const trackerRef = ref();
 const sliderOBJ = reactive({
   activeSlide: "",
   requiredFields: "",
@@ -53,15 +64,14 @@ const sliderOBJ = reactive({
   errorExist: 0,
   fieldsData: {},
   formSubmitted: false,
+  formTracker: "",
 });
-
 onMounted(() => {
   sliderOBJ.slideList = sliderRef.value.querySelectorAll("li");
   sliderOBJ.slideList.forEach((item, i) => {
     item.setAttribute("data-id", i + 1);
   });
   sliderOBJ.slideList[0].classList.add("active");
-  console.log(sliderRef.value);
   sliderOBJ.max = sliderOBJ.slideList.length;
   sliderOBJ.min = 1;
 });
@@ -244,7 +254,11 @@ const nextItem = () => {
       sliderOBJ.activeSlide = element;
     }
   });
-
+  if (props.formTracker) {
+    sliderOBJ.formTracker =
+      (sliderOBJ.currentDataId / (sliderOBJ.max - 1)) * 100;
+    trackerRef.value.style.width = sliderOBJ.formTracker + "%";
+  }
   const currentDataId = sliderOBJ.activeSlide.getAttribute("data-id");
   const nextId = parseInt(currentDataId) + 1;
   sliderOBJ.currentDataId = nextId;
@@ -303,6 +317,9 @@ const prevItem = () => {
 }
 .nudge {
   animation: wiggle 0.3s ease-in;
+}
+.formTracker {
+  transition: width 0.8s cubic-bezier(1, 0.05, 0.27, 0.99);
 }
 @keyframes wiggle {
   0% {

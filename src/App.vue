@@ -21,6 +21,7 @@ const validateInput = (e) => {
     <h2 class="text-white text-4xl text-center">Multi Step Form</h2>
 
     <QuestionSlider
+      :formTracker="true"
       v-cloak
       class="max-w-[420px] flex flex-col gap-4 items-center"
     >
