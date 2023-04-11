@@ -12,27 +12,31 @@
         <slot name="slideItems" :onClick="onClick" class=""> </slot>
       </div>
     </div>
-    <div class="flex gap-2 flex-row justify-between">
+    <div class="flex gap-2 flex-row items-center justify-center w-full">
       <button
         @click="checkFields()"
         v-if="sliderOBJ.currentDataId < sliderOBJ.max"
-        class="bg-blue-600 hover:bg-blue-800 text-white px-6 py-2 basis-1 rounded-full"
+        class="bg-blue-600 hover:bg-blue-800 text-white px-6 py-2 rounded-full"
+        :class="{ 'my-0 mx-auto': sliderOBJ.currentDataId == 1 }"
       >
-        Next
+        {{ props.navigation.next ? props.navigation.next : "Next" }}
       </button>
       <button
         v-if="sliderOBJ.currentDataId > sliderOBJ.min"
         @click="prevItem(slider)"
         class="bg-blue-600 hover:bg-blue-800 text-white px-6 py-2 rounded-full"
+        :class="{ 'basis-2/6': sliderOBJ.currentDataId == sliderOBJ.max }"
       >
-        Back
+        {{ props.navigation.previous ? props.navigation.previous : "Back" }}
       </button>
       <button
         v-if="sliderOBJ.currentDataId == sliderOBJ.max"
-        @click="fetchFormData()"
-        class="bg-blue-600 hover:bg-blue-800 w-full text-white px-6 py-2 rounded-full"
+        @click="checkFields()"
+        class="bg-blue-600 hover:bg-blue-800 basis-2/3 text-white px-6 py-2 rounded-full"
       >
-        Get Data
+        {{
+          props.navigation.submitCTA ? props.navigation.submitCTA : "Get data"
+        }}
       </button>
     </div>
     <div
@@ -47,6 +51,14 @@
 <script setup>
 import { onMounted, reactive, ref } from "vue";
 const props = defineProps({
+  navigation: {
+    type: Object,
+    default: {
+      previous: "Back",
+      next: "Next",
+      submitCTA: "Get Data",
+    },
+  },
   formTracker: {
     default: false,
   },
@@ -246,6 +258,18 @@ const checkFields = () => {
   if (sliderOBJ.errors.length <= 0) {
     sliderOBJ.errorExist = 0;
   }
+  //submit form if the active slider item is maximum
+  // for example if maximum slides are 3 and active slide is 3 then
+  // form will be submitted
+
+  if (sliderOBJ.currentDataId == sliderOBJ.max) {
+    if (props.formTracker) {
+      sliderOBJ.formTracker = (sliderOBJ.currentDataId / sliderOBJ.max) * 100;
+      trackerRef.value.style.width = sliderOBJ.formTracker + "%";
+    }
+    sliderOBJ.formSubmitted = true;
+    return;
+  }
   nextItem();
 };
 const nextItem = () => {
@@ -255,8 +279,7 @@ const nextItem = () => {
     }
   });
   if (props.formTracker) {
-    sliderOBJ.formTracker =
-      (sliderOBJ.currentDataId / (sliderOBJ.max - 1)) * 100;
+    sliderOBJ.formTracker = (sliderOBJ.currentDataId / sliderOBJ.max) * 100;
     trackerRef.value.style.width = sliderOBJ.formTracker + "%";
   }
   const currentDataId = sliderOBJ.activeSlide.getAttribute("data-id");
@@ -291,10 +314,15 @@ const prevItem = () => {
   });
 
   const currentDataId = sliderOBJ.activeSlide.getAttribute("data-id");
+  console.log(currentDataId);
 
   const nextId = parseInt(currentDataId) - 1;
   sliderOBJ.currentDataId = nextId;
 
+  if (props.formTracker) {
+    sliderOBJ.formTracker = (sliderOBJ.currentDataId / sliderOBJ.max) * 100;
+    trackerRef.value.style.width = sliderOBJ.formTracker + "%";
+  }
   sliderOBJ.slideList.forEach((element) => {
     if (nextId >= 1) {
       element.classList.remove("active");

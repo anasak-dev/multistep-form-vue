@@ -16,14 +16,19 @@ const validateInput = (e) => {
 
 <template>
   <div
-    class="w-fit my-0 mx-auto py-4 gap-4 flex flex-col items-center justify-center h-[100vh]"
+    class="w-fit my-0 mx-auto py-4 gap-4 flex flex-col items-center justify-center min-h-[100vh] h-full"
   >
     <h2 class="text-white text-4xl text-center">Multi Step Form</h2>
 
     <QuestionSlider
       :formTracker="true"
+      :navigation="{
+        next: 'Next Item',
+        previous: 'Go back',
+        submitCTA: 'Submit data',
+      }"
       v-cloak
-      class="max-w-[420px] flex flex-col gap-4 items-center"
+      class="max-w-[420px] flex flex-col gap-4 items-center px-5"
     >
       <template v-slot:slideItems="{ onClick }">
         <blockquote class="text-sm mb-8 italic bg-gray-100 p-2 rounded-md">
@@ -160,9 +165,19 @@ const validateInput = (e) => {
         <li>
           <div class="flex flex-col items-center text-center gap-4">
             <img :src="img6" alt="" class="rounded-md" />
-
-            <h2 class="text-2xl font-medium">All data has been entered</h2>
-            <p>Please click Get data to <br />render the fields value</p>
+            <p class="text-left">
+              Please let us know features you would like to see in this form
+              component. <span class="text-red-500">*</span>
+            </p>
+            <input
+              type="text"
+              name="yourcomments"
+              class="border border-black/30 outline-none rounded-md w-full px-4 py-2"
+              errorMsg="Please let us know your opinion about this component"
+              required
+              regex="."
+              @input="(e) => validateInput(e)"
+            />
           </div>
         </li>
       </template>
