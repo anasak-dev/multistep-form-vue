@@ -1,17 +1,6 @@
 <script setup>
 import img6 from "./assets/img6.avif";
 import QuestionSlider from "./components/QuestionSlider.vue";
-const validateInput = (e) => {
-  const emailReg = new RegExp(e.target.getAttribute("regex"));
-  const valid = emailReg.test(e.target.value);
-  if (!valid) {
-    e.target.classList.remove("border-green-500");
-    e.target.classList.add("border-red-500");
-    return;
-  }
-  e.target.classList.add("border-green-500");
-  e.target.classList.remove("border-red-500");
-};
 </script>
 
 <template>

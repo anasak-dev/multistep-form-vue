@@ -26,7 +26,7 @@
         v-cloak
         class="max-w-[420px] flex flex-col gap-4 items-center px-5"
       >
-        <template v-slot:multistep="{ onClick }">
+        <template v-slot:multistep="{ onClick, validateInput,slider }">
           <blockquote class="text-sm mb-8 italic bg-gray-100 p-2 rounded-md">
             "Fields marked with <span class="text-red-500">*</span> are required
             to be filled"

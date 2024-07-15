@@ -105,6 +105,7 @@
                 <input
                   :name="field.name"
                   type="text"
+                  data-name="Hello world"
                   :placeholder="field.placeholder"
                   @input="(e) => validateInput(e, sliderOBJ)"
                   :required="field.required"
@@ -269,6 +270,17 @@ const sliderOBJ = reactive({
   formSubmitted: false,
   formTracker: "",
 });
+const validateInput = (e) => {
+  const emailReg = new RegExp(e.target.getAttribute("regex"));
+  const valid = emailReg.test(e.target.value);
+  if (!valid) {
+    e.target.classList.remove("border-green-500");
+    e.target.classList.add("border-red-500");
+    return;
+  }
+  e.target.classList.add("border-green-500");
+  e.target.classList.remove("border-red-500");
+};
 onMounted(() => {
   sliderOBJ.slideList = sliderRef.value.querySelectorAll("li");
   sliderOBJ.slideList.forEach((item, i) => {
@@ -330,10 +342,18 @@ const checkFields = () => {
             );
           }
           if (
-            input.hasAttribute("required") &&
-            textAttr == "text" &&
-            input.value.length == 0
+            (input.hasAttribute("required") &&
+              input.parentElement.parentElement.classList.contains("active") &&
+              textAttr == "text" &&
+              input.value.length == 0) ||
+            (input.classList.contains("border-red-500") &&
+              textAttr == "text" &&
+              input.value.length == 0 &&
+              input.hasAttribute("required") &&
+              !input.parentElement.classList.contains("nestedElement")) ||
+            (input.classList.contains("border-red-500") && textAttr == "text")
           ) {
+            // check for nested fields
             sliderRef.value.classList.add("nudge");
             setTimeout(() => {
               sliderRef.value.classList.remove("nudge");
@@ -345,11 +365,13 @@ const checkFields = () => {
             input.classList.remove("border-green-500");
             input.insertAdjacentHTML(
               "afterend",
-              "<span class='bg-red-100 p-2 mt-3 text-sm rounded-md errorMsg block w-fit'>" +
+              "<span class='bg-red-100 p-2 mt-3 text-sm rounded-md errorMsg block w-fit sdsd'>" +
                 input.getAttribute("errorMsg") +
                 "</span>"
             );
+            return;
           }
+
           if (
             input.hasAttribute("required") &&
             textAttr == "checkbox" &&
@@ -377,17 +399,8 @@ const checkFields = () => {
             if (
               input.hasAttribute("required") &&
               input.getAttribute("type") == "text" &&
-              !input.value <= 0
-            ) {
-              sliderOBJ.fieldsData[fieldType] = input.value;
-              input.classList.add("border-green-500");
-              input.classList.remove("border-red-500");
-            }
-
-            if (
-              !input.hasAttribute("required") &&
-              input.getAttribute("type") == "text" &&
-              !input.value <= 0
+              !input.value <= 0 &&
+              input.classList.contains("border-red-500")
             ) {
               sliderOBJ.fieldsData[fieldType] = input.value;
               input.classList.add("border-green-500");
