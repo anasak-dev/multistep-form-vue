@@ -9,7 +9,179 @@
         ref="trackerRef"
       ></div>
       <div class="p-6">
-        <slot name="slideItems" :onClick="onClick" class=""> </slot>
+        <slot
+          name="multistep"
+          :slider="sliderOBJ"
+          :validateInput="validateInput"
+          v-if="sliderOBJ.formTracker < 100"
+        >
+          <div class="formSlides">
+            <li v-for="field in formFields" class="flex flex-col py-6">
+              <div class="flex items-center w-full justify-center">
+                <span class="font-bold text-2xl py-4">{{ field.title }} </span>
+              </div>
+              <div
+                v-if="field.type == 'checkbox'"
+                class="flex flex-col gap-2 items-center py-4 w-full justify-start"
+              >
+                <div
+                  v-for="option in field.options"
+                  class="flex flex-col gap-2 items-center w-full justify-start"
+                  errorMsg="At least one option needs to be selected"
+                >
+                  <label class="group w-full" :for="option">
+                    <input
+                      :name="field.name"
+                      type="checkbox"
+                      :placeholder="field.placeholder"
+                      @input="(e) => validateInput(e, sliderOBJ)"
+                      :required="field.required"
+                      :value="option"
+                      :id="option"
+                      class="border appearance-none peer hidden checked:border-red-200 checked:before w-[25px] h-[25px] rounded-full border-black/30"
+                    />
+                    <div
+                      class="button-radio peer-checked:shadow-none hover:before:block bg-white flex items-center justify-between button-radio py-6 px-4 w-full rounded-md"
+                    >
+                      <span>{{ option }} </span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+              <div
+                v-if="field.type == 'range'"
+                class="flex flex-col gap-2 items-center justify-start"
+              >
+                <div
+                  :class="{
+                    'text-red-500': rangeRef >= 20,
+                    'text-green-500': rangeRef < 20,
+                    'text-purple-600 text-4xl': rangeRef == field.max,
+                  }"
+                  class="transition-all duration-300 ease-in-out"
+                >
+                  <span class="px-6 py-2 rounded-sm shadow-xl bg-white block">
+                    <strong class="text-black">Users: </strong
+                    >{{ rangeRef ? rangeRef : field.min }}</span
+                  >
+                </div>
+                <div
+                  v-if="rangeRef == field.max && field.maxFeedback"
+                  class="text-base text-black/70"
+                >
+                  {{ field.maxFeedback }}
+                </div>
+                <input
+                  :name="field.name"
+                  type="range"
+                  :min="field.min"
+                  :max="field.max"
+                  :step="field.step"
+                  :value="rangeRef ? rangeRef : field.min"
+                  :placeholder="field.placeholder"
+                  @input="
+                    (e) => {
+                      validateInput(e, sliderOBJ);
+                      if (e.target) {
+                        rangeRef = e.target.value;
+                      }
+                      if (rangeRef == field.max) {
+                        e.target.classList.add('reachedMax');
+                      } else {
+                        e.target.classList.remove('reachedMax');
+                      }
+                    }
+                  "
+                  :required="field.required"
+                  :errorMsg="field.errorMsg"
+                  :regex="field.regex"
+                  class="border outline-none bg-white"
+                />
+              </div>
+              <div
+                v-if="field.type == 'text'"
+                class="flex flex-col gap-2 items-center justify-start"
+              >
+                <input
+                  :name="field.name"
+                  type="text"
+                  :placeholder="field.placeholder"
+                  @input="(e) => validateInput(e, sliderOBJ)"
+                  :required="field.required"
+                  :errorMsg="field.errorMsg"
+                  :regex="field.regex"
+                  class="border outline-none bg-white"
+                />
+              </div>
+              <div
+                v-if="field.type == 'radio' && field.imageType == false"
+                class="radio-parent grid gap-4 sm:grid-cols-2 grid-cols-1 w-full py-4"
+              >
+                <div
+                  v-for="option in field.options"
+                  errorMsg="At least one option needs to be selected"
+                >
+                  <div class="flex gap-2 w-full">
+                    <label class="group w-full" :for="option">
+                      <input
+                        type="radio"
+                        :name="field.name"
+                        :id="option"
+                        class="border appearance-none peer hidden checked:border-red-200 checked:before w-[25px] h-[25px] rounded-full border-black/30"
+                        :value="option"
+                        required
+                      />
+                      <div
+                        class="button-radio peer-checked:shadow-none hover:before:block bg-white flex items-center justify-between button-radio py-6 px-4 w-full rounded-md"
+                      >
+                        <span>{{ option }} </span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                v-if="field.type == 'radio' && field.imageType"
+                class="radio-parent grid gap-4 sm:grid-cols-2 grid-cols-1 self-center py-4"
+              >
+                <div
+                  v-for="option in field.options"
+                  errorMsg="At least one option needs to be selected"
+                >
+                  <div class="flex gap-2 w-full items-center">
+                    <label class="group" :for="option">
+                      <input
+                        type="radio"
+                        :name="field.name"
+                        :id="option"
+                        class="border appearance-none peer hidden checked:border-red-200 checked:before w-[25px] h-[25px] rounded-full border-black/30"
+                        :value="option[0]"
+                        required
+                      />
+                      <div
+                        class="peer-checked:shadow-none peer-checked:border-2 peer-checked:border-solid peer-checked:border-green-500 bg-white flex items-center transition-all duration-300 ease-in-out cursor-pointer justify-between hover:-translate-y-2 p-4 rounded-md"
+                      >
+                        <img
+                          :src="
+                            option[1]
+                              ? option[1]
+                              : `https://placehold.co/600x400?text=${option}`
+                          "
+                          class="rounded-md h-[140px] w-[140px] object-cover"
+                          alt=""
+                        />
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </li>
+          </div>
+        </slot>
+        <div class="h-full justify-center flex items-center flex-grow">
+          <slot name="success" v-if="sliderOBJ.formSubmitted"> </slot>
+        </div>
       </div>
     </div>
     <div class="flex gap-2 flex-row items-center justify-center w-full">
@@ -212,6 +384,16 @@ const checkFields = () => {
               input.classList.remove("border-red-500");
             }
 
+            if (
+              !input.hasAttribute("required") &&
+              input.getAttribute("type") == "text" &&
+              !input.value <= 0
+            ) {
+              sliderOBJ.fieldsData[fieldType] = input.value;
+              input.classList.add("border-green-500");
+              input.classList.remove("border-red-500");
+            }
+
             if (input.getAttribute("type") == "radio") {
               const checkedRadio = document.querySelector(
                 "input[name=dui]:checked"
@@ -327,6 +509,7 @@ const checkFields = () => {
   nextItem();
 };
 const nextItem = () => {
+  console.log(sliderOBJ.fieldsData);
   sliderOBJ.slideList.forEach((element) => {
     if (element.classList.contains("active")) {
       sliderOBJ.activeSlide = element;

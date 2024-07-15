@@ -20,7 +20,7 @@ const validateInput = (e) => {
   >
     <h2 class="text-white text-4xl text-center">Multi Step Form</h2>
 
-    <QuestionSlider
+    <!-- <QuestionSlider
       :formTracker="true"
       :integration="{
         api: 'cf7',
@@ -186,7 +186,7 @@ const validateInput = (e) => {
           </div>
         </li>
       </template>
-    </QuestionSlider>
+    </QuestionSlider> -->
   </div>
 </template>
 
