@@ -22,6 +22,11 @@ const validateInput = (e) => {
 
     <QuestionSlider
       :formTracker="true"
+      :integration="{
+        api: 'cf7',
+        apiId: '81',
+        formURL: '',
+      }"
       :navigation="{
         next: 'Next Item',
         previous: 'Go back',
@@ -41,7 +46,7 @@ const validateInput = (e) => {
             <span class="text-gray-200 pl-2">e.g. joe@foo.com</span>
             <input
               type="text"
-              name="email"
+              name="your-email"
               class="border border-black/30 outline-none rounded-md w-full px-4 py-2"
               required="required"
               errorMsg="Please fill the email field"
@@ -57,7 +62,7 @@ const validateInput = (e) => {
             </div>
             <input
               type="text"
-              name="phonenumber"
+              name="phone-number"
               class="border outline-none border-black/30 rounded-md w-full px-4 py-2"
               errorMsg="Please fill phone number "
               regex="^\d{10}$"

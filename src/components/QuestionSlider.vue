@@ -40,6 +40,12 @@
       </button>
     </div>
     <div
+      v-if="sliderOBJ.errors"
+      class="bg-green-200 max-w-[320px] px-4 py-6 my-4 rounded-md flex flex-col gap-4"
+    >
+      <h2 class="text-xl font-bold underline">{{ sliderOBJ.errors }}</h2>
+    </div>
+    <div
       v-if="sliderOBJ.formSubmitted"
       class="bg-green-200 max-w-[320px] px-4 py-6 my-4 rounded-md flex flex-col gap-4"
     >
@@ -50,6 +56,7 @@
 </template>
 <script setup>
 import { onMounted, reactive, ref } from "vue";
+import axios from "axios";
 const props = defineProps({
   navigation: {
     type: Object,
@@ -59,6 +66,17 @@ const props = defineProps({
       submitCTA: "Get Data",
     },
   },
+  integration: {
+    type: Object,
+    default: {
+      api: "",
+      apiId: "",
+      formTracker: false,
+      backgroundColor: "white",
+      formURL: "",
+    },
+  },
+
   formTracker: {
     default: false,
   },
@@ -71,6 +89,7 @@ const sliderOBJ = reactive({
   slideList: "",
   max: "",
   min: "",
+  loadingActive: false,
   currentDataId: 1,
   errors: [],
   errorExist: 0,
@@ -91,9 +110,7 @@ onMounted(() => {
 const fetchFormData = () => {
   sliderOBJ.formSubmitted = true;
 };
-const onClick = (e) => {
-  console.log(e);
-};
+
 const checkFields = () => {
   // flush all errors initially
   sliderOBJ.errors = [];
@@ -117,7 +134,6 @@ const checkFields = () => {
 
         element.querySelectorAll("input").forEach((input) => {
           const textAttr = input.getAttribute("type");
-          console.log(textAttr);
           if (
             input.hasAttribute("required") &&
             textAttr == "radio" &&
@@ -197,23 +213,17 @@ const checkFields = () => {
             }
 
             if (input.getAttribute("type") == "radio") {
-              console.log(document.querySelector("input[name=dui]:checked"));
               const checkedRadio = document.querySelector(
                 "input[name=dui]:checked"
               );
               sliderOBJ.fieldsData[fieldType] = document.querySelector(
                 "input[name=dui]:checked"
               ).value;
-              console.log(checkedRadio);
-              console.log(sliderOBJ);
             }
             if (input.getAttribute("type") == "checkbox") {
-              console.log(input);
-
               sliderOBJ.fieldsData[fieldType] = document.querySelector(
                 `input[name=${input["name"]}]`
               ).value;
-              console.log(sliderOBJ);
             }
           }
         });
@@ -267,6 +277,50 @@ const checkFields = () => {
       sliderOBJ.formTracker = (sliderOBJ.currentDataId / sliderOBJ.max) * 100;
       trackerRef.value.style.width = sliderOBJ.formTracker + "%";
     }
+
+    if (props.integration.api == "cf7" && props.integration.apiId) {
+      console.log("is this working");
+      const bodyFormData = new FormData();
+      Object.keys(sliderOBJ.fieldsData).forEach(function (key) {
+        bodyFormData.append(key, sliderOBJ.fieldsData[key]);
+        console.log(key, sliderOBJ.fieldsData[key]);
+      });
+      sliderOBJ.loadingActive = true;
+      axios
+        .post(
+          `${
+            props.integration.formURL
+              ? props.integration.formURL
+              : import.meta.env.VITE_WEB_URL
+          }/wp-json/contact-form-7/v1/contact-forms/${
+            props.integration.apiId
+          }/feedback`,
+          // `http://testv1.local/wp-json/contact-form-7/v1/contact-forms/${slider.apiId}/feedback`,
+          // `https://airpayusa.com/wp-json/contact-form-7/v1/contact-forms//${slider.apiId}/feedback`,
+          bodyFormData
+        )
+        .then(function (response) {
+          if (
+            response.data.message ==
+            "Thank you for your message. It has been sent."
+          ) {
+            sliderOBJ.formSubmitted = true;
+            sliderOBJ.fieldsData = [];
+          } else {
+            sliderOBJ.errors.push(response.data.message);
+            console.log(response.data.message);
+          }
+          sliderOBJ.loadingActive = false;
+        })
+        .catch(function (error) {
+          sliderOBJ.errors.push(error.message);
+          sliderOBJ.loadingActive = false;
+        });
+      return;
+    } else {
+      slider.formSubmitted = true;
+    }
+
     sliderOBJ.formSubmitted = true;
     return;
   }
@@ -286,7 +340,6 @@ const nextItem = () => {
   const nextId = parseInt(currentDataId) + 1;
   sliderOBJ.currentDataId = nextId;
 
-  console.log(nextId);
   sliderOBJ.slideList.forEach((element) => {
     if (element.querySelector("input")) {
       if (
