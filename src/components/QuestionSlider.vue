@@ -273,10 +273,18 @@ const sliderOBJ = reactive({
 const validateInput = (e) => {
   const emailReg = new RegExp(e.target.getAttribute("regex"));
   const valid = emailReg.test(e.target.value);
+  console.log(sliderOBJ.fieldsData);
+
   if (!valid) {
     e.target.classList.remove("border-green-500");
     e.target.classList.add("border-red-500");
     return;
+  }
+  if (
+    e.target.nextElementSibling &&
+    e.target.nextElementSibling.classList.contains("errorMsg")
+  ) {
+    e.target.nextElementSibling.remove();
   }
   e.target.classList.add("border-green-500");
   e.target.classList.remove("border-red-500");
@@ -399,9 +407,14 @@ const checkFields = () => {
             if (
               input.hasAttribute("required") &&
               input.getAttribute("type") == "text" &&
-              !input.value <= 0 &&
-              input.classList.contains("border-red-500")
+              !input.value <= 0
             ) {
+              sliderOBJ.fieldsData[fieldType] = input.value;
+              input.classList.add("border-green-500");
+              input.classList.remove("border-red-500");
+            }
+
+            if (input.getAttribute("type") == "text" && !input.value <= 0) {
               sliderOBJ.fieldsData[fieldType] = input.value;
               input.classList.add("border-green-500");
               input.classList.remove("border-red-500");
