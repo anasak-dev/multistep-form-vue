@@ -4,7 +4,7 @@
       class="flex rounded-md shadow-lg bg-white shadow-h p-6 px-0 pt-0 overflow-hidden flex-col"
     >
       <div
-        v-if="props.formTracker == true"
+        v-if="props.integration.formTracker == true"
         class="h-[6px] bg-green-500 formTracker w-0"
         ref="trackerRef"
       ></div>
@@ -239,6 +239,9 @@ const props = defineProps({
       submitCTA: "Get Data",
     },
   },
+  formTracker: {
+    default: false,
+  },
   integration: {
     type: Object,
     default: {
@@ -248,10 +251,6 @@ const props = defineProps({
       backgroundColor: "white",
       formURL: "",
     },
-  },
-
-  formTracker: {
-    default: false,
   },
 });
 const sliderRef = ref();
@@ -271,6 +270,7 @@ const sliderOBJ = reactive({
   formTracker: "",
 });
 const validateInput = (e) => {
+  console.log(props.tesssst);
   const emailReg = new RegExp(e.target.getAttribute("regex"));
   const valid = emailReg.test(e.target.value);
   console.log(sliderOBJ.fieldsData);
@@ -290,6 +290,7 @@ const validateInput = (e) => {
   e.target.classList.remove("border-red-500");
 };
 onMounted(() => {
+  console.log(props);
   sliderOBJ.slideList = sliderRef.value.querySelectorAll("li");
   sliderOBJ.slideList.forEach((item, i) => {
     item.setAttribute("data-id", i + 1);
@@ -481,7 +482,7 @@ const checkFields = () => {
   // form will be submitted
 
   if (sliderOBJ.currentDataId == sliderOBJ.max) {
-    if (props.formTracker) {
+    if (props.integration.formTracker) {
       sliderOBJ.formTracker = (sliderOBJ.currentDataId / sliderOBJ.max) * 100;
       trackerRef.value.style.width = sliderOBJ.formTracker + "%";
     }
@@ -541,7 +542,7 @@ const nextItem = () => {
       sliderOBJ.activeSlide = element;
     }
   });
-  if (props.formTracker) {
+  if (props.integration.formTracker) {
     sliderOBJ.formTracker = (sliderOBJ.currentDataId / sliderOBJ.max) * 100;
     trackerRef.value.style.width = sliderOBJ.formTracker + "%";
   }
@@ -581,7 +582,7 @@ const prevItem = () => {
   const nextId = parseInt(currentDataId) - 1;
   sliderOBJ.currentDataId = nextId;
 
-  if (props.formTracker) {
+  if (props.integration.formTracker) {
     sliderOBJ.formTracker = (sliderOBJ.currentDataId / sliderOBJ.max) * 100;
     trackerRef.value.style.width = sliderOBJ.formTracker + "%";
   }
