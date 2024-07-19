@@ -4,16 +4,24 @@
       class="flex rounded-md shadow-lg bg-white shadow-h p-6 px-0 pt-0 overflow-hidden flex-col"
     >
       <div
-        v-if="props.integration.formTracker == true"
+        v-show="
+          formTracker ? formTracker : props.integration.formTracker == true
+        "
         class="h-[6px] bg-green-500 formTracker w-0"
+        :style="{
+          backgroundColor: formTrackerColor
+            ? formTrackerColor
+            : props.integration.formTrackerColor,
+        }"
         ref="trackerRef"
       ></div>
+
       <div class="p-6">
         <slot
           name="multistep"
           :slider="sliderOBJ"
           :validateInput="validateInput"
-          v-if="sliderOBJ.formTracker < 100"
+          v-if="!sliderOBJ.formSubmitted"
         >
           <div class="formSlides">
             <li v-for="field in formFields" class="flex flex-col py-6">
@@ -183,16 +191,34 @@
         <div class="h-full justify-center flex items-center flex-grow">
           <slot name="success" v-if="sliderOBJ.formSubmitted"> </slot>
         </div>
+        <div class="h-full justify-center flex items-center flex-grow">
+          <slot
+            name="errors"
+            :apiErrors="sliderOBJ.apiError"
+            v-if="sliderOBJ.apiError.length > 0"
+          >
+          </slot>
+        </div>
       </div>
     </div>
-    <div class="flex gap-2 flex-row items-center justify-center w-full">
+
+    <div
+      class="flex gap-2 flex-row items-center justify-center w-full"
+      v-if="!sliderOBJ.formSubmitted"
+    >
       <button
         @click="checkFields()"
         v-if="sliderOBJ.currentDataId < sliderOBJ.max"
         class="bg-blue-600 hover:bg-blue-800 text-white px-6 py-2 rounded-full"
         :class="{ 'my-0 mx-auto': sliderOBJ.currentDataId == 1 }"
       >
-        {{ props.navigation.next ? props.navigation.next : "Next" }}
+        {{
+          formNext
+            ? formNext
+            : props.navigation.next
+            ? props.navigation.next
+            : "Next"
+        }}
       </button>
       <button
         v-if="sliderOBJ.currentDataId > sliderOBJ.min"
@@ -200,7 +226,13 @@
         class="bg-blue-600 hover:bg-blue-800 text-white px-6 py-2 rounded-full"
         :class="{ 'basis-2/6': sliderOBJ.currentDataId == sliderOBJ.max }"
       >
-        {{ props.navigation.previous ? props.navigation.previous : "Back" }}
+        {{
+          formPrev
+            ? formPrev
+            : props.navigation.previous
+            ? props.navigation.previous
+            : "Back"
+        }}
       </button>
       <button
         v-if="sliderOBJ.currentDataId == sliderOBJ.max"
@@ -208,28 +240,33 @@
         class="bg-blue-600 hover:bg-blue-800 basis-2/3 text-white px-6 py-2 rounded-full"
       >
         {{
-          props.navigation.submitCTA ? props.navigation.submitCTA : "Get data"
+          formSubmit
+            ? formSubmit
+            : props.navigation.submitCTA
+            ? props.navigation.submitCTA
+            : "Get data"
         }}
       </button>
     </div>
-    <div
+    <!-- <div
       v-if="sliderOBJ.errors"
-      class="bg-green-200 max-w-[320px] px-4 py-6 my-4 rounded-md flex flex-col gap-4"
+      class="bg-red-200 max-w-[320px] px-4 py-6 my-4 rounded-md flex flex-col gap-4"
     >
       <h2 class="text-xl font-bold underline">{{ sliderOBJ.errors }}</h2>
-    </div>
-    <div
+    </div> -->
+    <!-- <div
       v-if="sliderOBJ.formSubmitted"
       class="bg-green-200 max-w-[320px] px-4 py-6 my-4 rounded-md flex flex-col gap-4"
     >
       <h2 class="text-xl font-bold underline">Form submitted data</h2>
       {{ sliderOBJ.fieldsData }}
-    </div>
+    </div> -->
   </div>
 </template>
 <script setup>
 import { onMounted, reactive, ref } from "vue";
 import axios from "axios";
+
 const props = defineProps({
   navigation: {
     type: Object,
@@ -247,12 +284,14 @@ const props = defineProps({
     default: {
       api: "",
       apiId: "",
+      formTrackerColor: "",
       formTracker: false,
       backgroundColor: "white",
       formURL: "",
     },
   },
 });
+
 const sliderRef = ref();
 const trackerRef = ref();
 const sliderOBJ = reactive({
@@ -267,6 +306,7 @@ const sliderOBJ = reactive({
   errorExist: 0,
   fieldsData: {},
   formSubmitted: false,
+  apiError: [],
   formTracker: "",
 });
 const validateInput = (e) => {
@@ -289,8 +329,19 @@ const validateInput = (e) => {
   e.target.classList.add("border-green-500");
   e.target.classList.remove("border-red-500");
 };
+const formTracker = ref(null);
+const formTrackerColor = ref(null);
+const formNext = ref(null);
+const formPrev = ref(null);
+const formSubmit = ref(null);
+
+// Define a ref for the formTracker
+
 onMounted(() => {
+  // options for visual
+
   console.log(props);
+
   sliderOBJ.slideList = sliderRef.value.querySelectorAll("li");
   sliderOBJ.slideList.forEach((item, i) => {
     item.setAttribute("data-id", i + 1);
@@ -486,6 +537,28 @@ const checkFields = () => {
       sliderOBJ.formTracker = (sliderOBJ.currentDataId / sliderOBJ.max) * 100;
       trackerRef.value.style.width = sliderOBJ.formTracker + "%";
     }
+    // zapier webhook
+    if (props.integration.api == "zapier") {
+      const bodyFormData = new FormData();
+      Object.keys(sliderOBJ.fieldsData).forEach(function (key) {
+        bodyFormData.append(key, sliderOBJ.fieldsData[key]);
+        console.log(key, sliderOBJ.fieldsData[key]);
+      });
+      axios
+        .post(`${props.integration.apiId}`, bodyFormData)
+        .then(function (response) {
+          if (response.data.status == "success") {
+            sliderOBJ.formSubmitted = true;
+            sliderOBJ.fieldsData = [];
+          } else {
+            sliderOBJ.apiError.push(response.data.status);
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+    // contact form 7
 
     if (props.integration.api == "cf7" && props.integration.apiId) {
       console.log("is this working");
@@ -504,8 +577,6 @@ const checkFields = () => {
           }/wp-json/contact-form-7/v1/contact-forms/${
             props.integration.apiId
           }/feedback`,
-          // `http://testv1.local/wp-json/contact-form-7/v1/contact-forms/${slider.apiId}/feedback`,
-          // `https://airpayusa.com/wp-json/contact-form-7/v1/contact-forms//${slider.apiId}/feedback`,
           bodyFormData
         )
         .then(function (response) {
@@ -516,21 +587,21 @@ const checkFields = () => {
             sliderOBJ.formSubmitted = true;
             sliderOBJ.fieldsData = [];
           } else {
-            sliderOBJ.errors.push(response.data.message);
+            sliderOBJ.apiError.push(response.data.message);
             console.log(response.data.message);
           }
           sliderOBJ.loadingActive = false;
         })
         .catch(function (error) {
-          sliderOBJ.errors.push(error.message);
+          sliderOBJ.apiError.push(error.message);
           sliderOBJ.loadingActive = false;
         });
       return;
     } else {
-      slider.formSubmitted = true;
+      sliderOBJ.formSubmitted = true;
     }
 
-    sliderOBJ.formSubmitted = true;
+    sliderOBJ.formSubmitted = false;
     return;
   }
   nextItem();

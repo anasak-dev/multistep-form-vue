@@ -6,20 +6,125 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + Vue</title>
   </head>
-  <body>
-    <div
-      id="app"
-      class="bg-slate-800 flex items-center justify-center min-h-[100vh] py-10"
+  <body class="bg-slate-800">
+    <!-- <div
+      class="formOptions overflow-hidden shadow-lg flex justify-start gap-2 items-start flex-col absolute left-4 top-4 rounded-md max-w-fit bg-white"
     >
+      <div
+        class="bg-black py-4 px-4 w-full formProps flex justify-between text-white gap-2 cursor-pointer"
+      >
+        <h2 class="text-md font-bold text-white">
+          Available Form Props <span></span>
+        </h2>
+        <span class="toggleIcon">+</span>
+      </div>
+      <div
+        class="py-4 px-4 formPropsInner justify-start gap-10 items-start hidden"
+      >
+        <div class="flex flex-col items-start gap-3">
+          <h4 class="text-md font-bold pb-2">Form Feedback</h4>
+
+          <label
+            for="formTracker"
+            class="text-sm flex-col items-start flex gap-2"
+          >
+            Form Progress Tracker
+            <input
+              type="checkbox"
+              checked
+              name="formTracker"
+              id="formTracker"
+            />
+          </label>
+
+          <label for="formTrackercolor" class="text-sm flex flex-col gap-2">
+            Form Progress Tracker Color
+
+            <input
+              type="color"
+              name=" formTrackercolor"
+              id="trackerColor"
+              value="#22c55d"
+              class="rounded-md w-10"
+            />
+          </label>
+        </div>
+
+        <div class="flex flex-col items-start gap-4">
+          <h4 class="text-md font-bold">Form navigation</h4>
+          <label for="formNext" class="text-sm flex flex-col gap-2"
+            >Next button text
+            <input
+              type="text"
+              name="formNext"
+              id="formNext"
+              value="Next"
+              class="bg-transparent border border-gray-300 px-2 py-2 rounded-md"
+            />
+          </label>
+          <label for="formPrev" class="text-sm flex flex-col gap-2"
+            >Previous button text
+
+            <input
+              type="text"
+              name="formPrev"
+              id="formPrev"
+              value="Go back"
+              class="bg-transparent border border-gray-300 px-2 py-2 rounded-md"
+            />
+          </label>
+          <label for="formSubmit" class="text-sm flex flex-col gap-2"
+            >Submit button text
+
+            <input
+              type="text"
+              name="formSubmit"
+              id="formSubmit"
+              value="Submit data"
+              class="bg-transparent border border-gray-300 px-2 py-2 rounded-md"
+            />
+          </label>
+        </div>
+
+        <div class="flex flex-col items-start gap-4">
+          <h4 class="text-md font-bold">Form Integration</h4>
+          <label for="formNext" class="text-sm flex flex-col gap-2"
+            >Contact form
+            <p class="text-xs">(only contact form 7 available now)</p>
+            <input
+              type="text"
+              name="formIntegration"
+              id="formIntegration"
+              value="cf7"
+              class="bg-transparent border border-gray-300 px-2 py-2 rounded-md"
+            />
+          </label>
+          <label for="formPrev" class="text-sm flex flex-col gap-2"
+            >Contact form api id
+
+            <input
+              type="text"
+              name="formIntegrationId"
+              id="formIntegrationId"
+              value="81"
+              class="bg-transparent border border-gray-300 px-2 py-2 rounded-md"
+            />
+          </label>
+        </div>
+      </div>
+    </div> -->
+
+    <div id="app" class="flex items-center justify-center min-h-[100vh] py-10">
       <question-slider
         :integration="{
         api: 'cf7',
         apiId: '81',
         formURL: '',
-        formTracker:false,
+        formTracker: true,
+        formTrackerColor:'red'
       }"
         :navigation="{
-        next: 'Next Item',
+        next: '',
         previous: 'Go back',
         submitCTA: 'Submit data',
       }"
@@ -182,8 +287,29 @@
             Form is successfully submitted
           </div>
         </template>
+        <template v-slot:errors="{apiErrors}">
+          <div class="bg-red-200 px-4 rounded-sm py-2 mt-2">
+            Submission Failed: {{apiErrors}}
+          </div>
+        </template>
       </question-slider>
     </div>
     <script type="module" src="/src/main.js"></script>
+    <script>
+      document.querySelector("#formTracker").addEventListener("change", (e) => {
+        console.log(e.target.value);
+      });
+      document.querySelector(".formProps").addEventListener("click", () => {
+        document.querySelector(".formPropsInner").classList.contains("hidden")
+          ? (document.querySelector(".formPropsInner").classList.add("flex"),
+            document
+              .querySelector(".formPropsInner")
+              .classList.remove("hidden"),
+            (document.querySelector(".toggleIcon").innerHTML = "-"))
+          : (document.querySelector(".formPropsInner").classList.remove("flex"),
+            document.querySelector(".formPropsInner").classList.add("hidden"),
+            (document.querySelector(".toggleIcon").innerHTML = "+"));
+      });
+    </script>
   </body>
 </html>
